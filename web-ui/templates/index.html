@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>FS Recovery UI</title>
+  <style>
+    body { font-family: Arial; margin: 18px; }
+    #output { background: #000; color: #0f0; padding: 12px; min-height: 250px; white-space: pre-wrap; }
+    button { margin: 3px; padding: 6px 10px; }
+    input[type=text] { width: 60%; padding: 6px; }
+  </style>
+</head>
+<body>
+
+<h2>File System Recovery & Optimization — GUI</h2>
+
+<div>
+  <input id="cmd" type="text" placeholder="Enter command...">
+  <button id="runBtn">Run</button>
+  <button id="clearBtn">Clear</button>
+</div>
+
+<h3>Quick Actions</h3>
+<button class="q" data-cmd="init">init</button>
+<button class="q" data-cmd="create notes 1000">create notes</button>
+<button class="q" data-cmd="write notes Hello from GUI!">write</button>
+<button class="q" data-cmd="read notes">read</button>
+<button class="q" data-cmd="chkpt">chkpt</button>
+<button class="q" data-cmd="crash 1">crash 1</button>
+<button class="q" data-cmd="crash 2">crash 2</button>
+<button class="q" data-cmd="recover">recover</button>
+<button class="q" data-cmd="ls">ls</button>
+<button class="q" data-cmd="frag">frag</button>
+<button class="q" data-cmd="defrag">defrag</button>
+
+<h3>Output</h3>
+<div id="output">Output will appear here...</div>
+
+<script>
+async function send(cmds){
+  const res = await fetch('/api/exec', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({commands: cmds})
+  });
+  return res.json();
+}
+
+document.getElementById('runBtn').onclick = async () => {
+  const cmd = document.getElementById('cmd').value.trim();
+  if (!cmd) return;
+  const out = document.getElementById('output');
+  out.textContent += "\n> " + cmd + "\n";
+  const res = await send([cmd]);
+  out.textContent += res.out + "\n";
+};
+
+document.getElementById('clearBtn').onclick = () => {
+  document.getElementById('output').textContent = "";
+};
+
+document.querySelectorAll('.q').forEach(btn => {
+  btn.onclick = async () => {
+    const cmd = btn.dataset.cmd;
+    const out = document.getElementById('output');
+    out.textContent += "\n> " + cmd + "\n";
+    const res = await send([cmd]);
+    out.textContent += res.out + "\n";
+  };
+});
+</script>
+
+</body>
+</html>
